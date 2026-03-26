@@ -1,51 +1,199 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>爆速家計簿</title>
     <style>
         :root {
             --bg-color: #f2f2f7;
-            --chihiro-color: #007aff; --chihiro-bg: #e5f1ff;
-            --haruka-color: #ff2d55; --haruka-bg: #ffeef2;
-            --shared-color: #ff9500; --shared-bg: #fff4e5;
+            --chihiro-color: #007aff;
+            --chihiro-bg: #e5f1ff;
+            --haruka-color: #ff2d55;
+            --haruka-bg: #ffeef2;
+            --shared-color: #ff9500;
+            --shared-bg: #fff4e5;
         }
-        body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; width: 100%; max-width: 350px; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box; }
-        h3 { margin: 0 0 20px 0; text-align: center; color: #333; font-size: 1.1rem; }
-        
-        input[type="date"], input[type="number"] { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 18px; box-sizing: border-box; background: #f9f9f9; outline: none; }
-        label { display: block; font-size: 0.8rem; color: #999; margin: 15px 0 5px 5px; font-weight: bold; }
 
-        .user-selector { display: flex; gap: 10px; margin-top: 5px; }
-        .user-selector input { display: none; }
-        .user-selector label { flex: 1; text-align: center; padding: 15px 0; border-radius: 12px; background: #eee; color: #666; cursor: pointer; font-weight: bold; border: 2px solid transparent; transition: 0.2s; }
-        
-        input[id="uA"]:checked + label { background: var(--chihiro-bg); border-color: var(--chihiro-color); color: var(--chihiro-color); }
-        input[id="uB"]:checked + label { background: var(--haruka-bg); border-color: var(--haruka-color); color: var(--haruka-color); }
-        input[id="uShared"]:checked + label { background: var(--shared-bg); border-color: var(--shared-color); color: var(--shared-color); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            /* iPhoneのセーフエリアを考慮 */
+            padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 20px) 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        button { width: 100%; padding: 18px; background: #1c1c1e; color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; margin-top: 25px; }
-        button:active { opacity: 0.7; transform: scale(0.98); }
+        .card {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
 
-        .totals { display: flex; justify-content: space-between; margin-top: 20px; width: 100%; max-width: 350px; gap: 10px; }
-        .total-item { flex: 1; background: white; padding: 12px 5px; border-radius: 15px; text-align: center; font-size: 0.7rem; color: #888; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .total-val { display: block; font-size: 0.9rem; font-weight: bold; color: #333; margin-top: 3px; }
+        h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #333;
+            font-size: 1.1rem;
+        }
 
-        .history { width: 100%; max-width: 350px; margin-top: 20px; }
-        .history-item { background: rgba(255,255,255,0.6); padding: 10px 15px; border-radius: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
-        .tag { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
+        /* 入力欄：16px以上にすることでズームを防止 */
+        input[type="date"],
+        input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: #f9f9f9;
+            outline: none;
+            appearance: none;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: #999;
+            margin: 15px 0 5px 5px;
+            font-weight: bold;
+        }
+
+        .user-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .user-selector input {
+            display: none;
+        }
+
+        .user-selector label {
+            flex: 1;
+            text-align: center;
+            padding: 16px 0;
+            border-radius: 12px;
+            background: #eee;
+            color: #666;
+            cursor: pointer;
+            font-weight: bold;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            margin: 0;
+        }
+
+        input[id="uA"]:checked+label {
+            background: var(--chihiro-bg);
+            border-color: var(--chihiro-color);
+            color: var(--chihiro-color);
+        }
+
+        input[id="uB"]:checked+label {
+            background: var(--haruka-bg);
+            border-color: var(--haruka-color);
+            color: var(--haruka-color);
+        }
+
+        input[id="uShared"]:checked+label {
+            background: var(--shared-bg);
+            border-color: var(--shared-color);
+            color: var(--shared-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: #1c1c1e;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 25px;
+            cursor: pointer;
+        }
+
+        button:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+
+        .totals {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            gap: 8px;
+        }
+
+        .total-item {
+            flex: 1;
+            background: white;
+            padding: 12px 4px;
+            border-radius: 14px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #888;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .total-val {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #333;
+            margin-top: 3px;
+        }
+
+        .history {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 12px 15px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            /* すりガラス効果 */
+        }
+
+        .tag {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="card">
         <h3>💰 食費入力</h3>
         <form id="kakeiboForm">
             <input type="date" id="date" required>
-            
+
             <label>だれのもの？</label>
             <div class="user-selector">
                 <input type="radio" name="user" value="千媛" id="uA" required><label for="uA">千媛</label>
@@ -69,8 +217,15 @@
     <div id="history" class="history"></div>
 
     <script>
+        // GASのURLは元のものを引き継いでいます
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwU_7kZnm_stjgRlwdYaaQOWT_CrhV_qyH5LEKiSjD5O08xZsOLPjquF_of0Cjcju8JXA/exec";
-        document.getElementById('date').valueAsDate = new Date();
+
+        // 今日の日付をセット
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = ("0" + (today.getMonth() + 1)).slice(-2);
+        const dd = ("0" + today.getDate()).slice(-2);
+        document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
 
         const updateUI = (data) => {
             document.getElementById('tA').innerText = "¥" + data.totals["千媛"].toLocaleString();
@@ -78,33 +233,52 @@
             document.getElementById('tS').innerText = "¥" + data.totals["共有"].toLocaleString();
             const h = document.getElementById('history');
             h.innerHTML = data.history.map(i => {
-                const c = i.user==="千媛"?"var(--chihiro-color)":i.user==="春香"?"var(--haruka-color)":"var(--shared-color)";
+                const c = i.user === "千媛" ? "var(--chihiro-color)" : i.user === "春香" ? "var(--haruka-color)" : "var(--shared-color)";
                 return `<div class="history-item">
                     <span class="tag" style="background:${c}15; color:${c}">${i.user}</span>
                     <span style="font-weight:bold; flex-grow:1; text-align:right; margin-right:15px;">¥${i.amount}</span>
-                    <span style="color:#bbb; font-size:0.7rem;">${i.date}</span>
+                    <span style="color:#bbb; font-size:0.75rem;">${i.date}</span>
                 </div>`;
             }).join('');
         };
 
-        window.onload = async () => { try { const r = await fetch(GAS_URL); updateUI(await r.json()); } catch(e){} };
+        // 初回読み込み
+        window.onload = async () => {
+            try {
+                const r = await fetch(GAS_URL);
+                updateUI(await r.json());
+            } catch (e) { console.error("Load Error", e); }
+        };
 
+        // 送信処理
         document.getElementById('kakeiboForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            btn.disabled = true; btn.innerText = "送信中...";
+            btn.disabled = true;
+            btn.innerText = "送信中...";
+
             const body = {
                 date: document.getElementById('date').value,
                 user: document.querySelector('input[name="user"]:checked').value,
                 amount: document.getElementById('amount').value
             };
+
             try {
                 const r = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(body) });
-                updateUI(await r.json());
+                const result = await r.json();
+                updateUI(result);
                 document.getElementById('amount').value = "";
-            } catch (e) { alert("エラー"); }
-            finally { btn.disabled = false; btn.innerText = "保存する"; }
+                // 成功時に少しだけボタンの色を変えるフィードバック
+                btn.style.background = "#4cd964";
+                setTimeout(() => { btn.style.background = "#1c1c1e"; }, 1000);
+            } catch (e) {
+                alert("エラーが発生しました。ネット接続を確認してください。");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "保存する";
+            }
         };
     </script>
 </body>
+
 </html>
