@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>爆速家計簿</title>
+    <style>
+        :root {
+            --bg-color: #f2f2f7;
+            --chihiro-color: #007aff; --chihiro-bg: #e5f1ff;
+            --haruka-color: #ff2d55; --haruka-bg: #ffeef2;
+            --shared-color: #ff9500; --shared-bg: #fff4e5;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; width: 100%; max-width: 350px; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box; }
+        h3 { margin: 0 0 20px 0; text-align: center; color: #333; font-size: 1.1rem; }
+        
+        input[type="date"], input[type="number"] { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 18px; box-sizing: border-box; background: #f9f9f9; outline: none; }
+        label { display: block; font-size: 0.8rem; color: #999; margin: 15px 0 5px 5px; font-weight: bold; }
+
+        .user-selector { display: flex; gap: 10px; margin-top: 5px; }
+        .user-selector input { display: none; }
+        .user-selector label { flex: 1; text-align: center; padding: 15px 0; border-radius: 12px; background: #eee; color: #666; cursor: pointer; font-weight: bold; border: 2px solid transparent; transition: 0.2s; }
+        
+        input[id="uA"]:checked + label { background: var(--chihiro-bg); border-color: var(--chihiro-color); color: var(--chihiro-color); }
+        input[id="uB"]:checked + label { background: var(--haruka-bg); border-color: var(--haruka-color); color: var(--haruka-color); }
+        input[id="uShared"]:checked + label { background: var(--shared-bg); border-color: var(--shared-color); color: var(--shared-color); }
+
+        button { width: 100%; padding: 18px; background: #1c1c1e; color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; margin-top: 25px; }
+        button:active { opacity: 0.7; transform: scale(0.98); }
+
+        .totals { display: flex; justify-content: space-between; margin-top: 20px; width: 100%; max-width: 350px; gap: 10px; }
+        .total-item { flex: 1; background: white; padding: 12px 5px; border-radius: 15px; text-align: center; font-size: 0.7rem; color: #888; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .total-val { display: block; font-size: 0.9rem; font-weight: bold; color: #333; margin-top: 3px; }
+
+        .history { width: 100%; max-width: 350px; margin-top: 20px; }
+        .history-item { background: rgba(255,255,255,0.6); padding: 10px 15px; border-radius: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+        .tag { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h3>💰 食費入力</h3>
+        <form id="kakeiboForm">
+            <input type="date" id="date" required>
+            
+            <label>だれのもの？</label>
+            <div class="user-selector">
+                <input type="radio" name="user" value="千媛" id="uA" required><label for="uA">千媛</label>
+                <input type="radio" name="user" value="春香" id="uB"><label for="uB">春香</label>
+                <input type="radio" name="user" value="共有" id="uShared"><label for="uShared">共有</label>
+            </div>
+
+            <label>金額</label>
+            <input type="number" id="amount" placeholder="¥ 0" inputmode="decimal" required>
+
+            <button type="submit" id="submitBtn">保存する</button>
+        </form>
+    </div>
+
+    <div class="totals">
+        <div class="total-item">千媛<span id="tA" class="total-val" style="color:var(--chihiro-color)">¥0</span></div>
+        <div class="total-item">春香<span id="tB" class="total-val" style="color:var(--haruka-color)">¥0</span></div>
+        <div class="total-item">共有<span id="tS" class="total-val" style="color:var(--shared-color)">¥0</span></div>
+    </div>
+
+    <div id="history" class="history"></div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwU_7kZnm_stjgRlwdYaaQOWT_CrhV_qyH5LEKiSjD5O08xZsOLPjquF_of0Cjcju8JXA/exec";
+        document.getElementById('date').valueAsDate = new Date();
+
+        const updateUI = (data) => {
+            document.getElementById('tA').innerText = "¥" + data.totals["千媛"].toLocaleString();
+            document.getElementById('tB').innerText = "¥" + data.totals["春香"].toLocaleString();
+            document.getElementById('tS').innerText = "¥" + data.totals["共有"].toLocaleString();
+            const h = document.getElementById('history');
+            h.innerHTML = data.history.map(i => {
+                const c = i.user==="千媛"?"var(--chihiro-color)":i.user==="春香"?"var(--haruka-color)":"var(--shared-color)";
+                return `<div class="history-item">
+                    <span class="tag" style="background:${c}15; color:${c}">${i.user}</span>
+                    <span style="font-weight:bold; flex-grow:1; text-align:right; margin-right:15px;">¥${i.amount}</span>
+                    <span style="color:#bbb; font-size:0.7rem;">${i.date}</span>
+                </div>`;
+            }).join('');
+        };
+
+        window.onload = async () => { try { const r = await fetch(GAS_URL); updateUI(await r.json()); } catch(e){} };
+
+        document.getElementById('kakeiboForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerText = "送信中...";
+            const body = {
+                date: document.getElementById('date').value,
+                user: document.querySelector('input[name="user"]:checked').value,
+                amount: document.getElementById('amount').value
+            };
+            try {
+                const r = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(body) });
+                updateUI(await r.json());
+                document.getElementById('amount').value = "";
+            } catch (e) { alert("エラー"); }
+            finally { btn.disabled = false; btn.innerText = "保存する"; }
+        };
+    </script>
+</body>
+</html>
