@@ -16,7 +16,6 @@
             --shared-bg: #fff4e5;
         }
 
-        /* 画面全体の設定 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-color);
@@ -25,8 +24,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 横揺れを防止 */
-            overflow-x: hidden;
+            overflow-x: hidden; /* 横揺れ防止 */
         }
 
         /* タブ切り替え */
@@ -44,45 +42,38 @@
         .card {
             background: white; width: 100%; max-width: 400px;
             border-radius: 24px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            box-sizing: border-box; /* これがズレ防止の肝 */
+            box-sizing: border-box;
         }
 
         h3 { margin: 0 0 15px 0; text-align: center; color: #333; font-size: 1.1rem; }
 
-        /* --- 【最重要】ズレを徹底修正するCSS --- */
+        /* 【鉄壁】レスポンシブ修正：box-sizingとappearanceを徹底 */
         input {
-            width: 100%;
-            display: block;
-            padding: 14px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 16px;
-            /* 枠線と余白を幅に含める設定 */
-            box-sizing: border-box; 
-            background: #f9f9f9;
-            outline: none;
-            margin-bottom: 10px;
-            /* iPhoneのデフォルトデザインを解除 */
-            -webkit-appearance: none;
-            appearance: none;
+            width: 100%; display: block; padding: 14px;
+            border: 1px solid #ddd; border-radius: 12px;
+            font-size: 16px; box-sizing: border-box; 
+            background: #f9f9f9; outline: none; margin-bottom: 10px;
+            -webkit-appearance: none; appearance: none;
         }
-        
-        /* 日付入力の右端ハミ出しを無理やり抑え込む */
-        input[type="date"] {
-            min-height: 48px;
-            max-width: 100%;
-        }
+        input[type="date"] { min-height: 48px; max-width: 100%; }
 
         .user-selector { display: flex; gap: 8px; margin-bottom: 15px; width: 100%; }
         .user-selector input { display: none; }
         .user-selector label {
             flex: 1; text-align: center; padding: 16px 0; border-radius: 14px;
-            background: #eee; color: #666; cursor: pointer; font-weight: bold; transition: 0.2s;
-            box-sizing: border-box;
+            background: #eee; color: #666; cursor: pointer; font-weight: bold;
+            transition: 0.2s; box-sizing: border-box; font-size: 0.9rem;
         }
         input[id="uA"]:checked+label { background: var(--chihiro-bg); color: var(--chihiro-color); border: 2px solid var(--chihiro-color); }
         input[id="uB"]:checked+label { background: var(--haruka-bg); color: var(--haruka-color); border: 2px solid var(--haruka-color); }
         input[id="uShared"]:checked+label { background: var(--shared-bg); color: var(--shared-color); border: 2px solid var(--shared-color); }
+
+        /* 固定費用のクイックボタン */
+        .q-btn-container { display: none; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; width: 100%; }
+        .q-btn {
+            background: #fff; border: 1px solid #ddd; padding: 8px 12px;
+            border-radius: 20px; font-size: 0.8rem; cursor: pointer; color: #555;
+        }
 
         button#submitBtn {
             width: 100%; padding: 18px; background: #1c1c1e; color: white; border: none;
@@ -92,14 +83,15 @@
         .month-selector {
             display: flex; align-items: center; justify-content: space-between;
             width: 100%; max-width: 400px; margin: 20px 0 10px;
-            background: #fff; padding: 8px 15px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            box-sizing: border-box;
+            background: #fff; padding: 8px 15px; border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); box-sizing: border-box;
         }
         .month-btn { background: #f2f2f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
+        .month-btn:disabled { opacity: 0.2; }
 
         .totals-shokuhi {
             display: flex; justify-content: space-between; margin-top: 10px;
-            width: 100%; max-width: 400px; gap: 8px;
+            width: 100%; max-width: 400px; gap: 8px; box-sizing: border-box;
         }
         .total-item {
             flex: 1; background: white; padding: 12px 4px; border-radius: 16px;
@@ -113,13 +105,14 @@
             padding: 20px; border-radius: 24px; text-align: center;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06); box-sizing: border-box;
         }
-        .settle-main-val { font-size: 1.6rem; font-weight: 900; margin: 5px 0; }
+        .settle-main-val { font-size: 1.6rem; font-weight: 900; margin: 5px 0; line-height: 1.2; }
         .settle-sub { font-size: 0.75rem; color: #666; font-weight: bold; }
 
-        .history { width: 100%; max-width: 400px; margin-top: 20px; }
+        .history { width: 100%; max-width: 400px; margin-top: 20px; box-sizing: border-box; }
         .history-item {
             background: rgba(255, 255, 255, 0.7); padding: 12px 15px; border-radius: 16px;
             margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
         }
     </style>
 </head>
@@ -141,15 +134,24 @@
                 <input type="radio" name="user" value="共有" id="uShared"><label for="uShared">共有</label>
             </div>
             <input type="number" id="amount" placeholder="¥ 0" inputmode="decimal" required>
+            
             <input type="text" id="memo" placeholder="何に使った？">
+            <div id="quickButtons" class="q-btn-container">
+                <button type="button" class="q-btn" onclick="setMemo('⚡ 電気代')">⚡ 電気</button>
+                <button type="button" class="q-btn" onclick="setMemo('🔥 ガス代')">🔥 ガス</button>
+                <button type="button" class="q-btn" onclick="setMemo('💧 水道代')">💧 水道</button>
+                <button type="button" class="q-btn" onclick="setMemo('🥛 サーバー')">🥛 サーバー</button>
+                <button type="button" class="q-btn" onclick="setMemo('🚗 駐車代')">🚗 駐車</button>
+            </div>
+            
             <button type="submit" id="submitBtn">保存する</button>
         </form>
     </div>
 
     <div id="monthArea" class="month-selector">
-        <button class="month-btn" onclick="changeMonth(-1)">◀</button>
+        <button class="month-btn" id="prevBtn" onclick="changeMonth(1)">▶</button>
         <div id="viewTitle">読み込み中...</div>
-        <button class="month-btn" onclick="changeMonth(1)">▶</button>
+        <button class="month-btn" id="nextBtn" onclick="changeMonth(-1)">◀</button>
     </div>
 
     <div id="shokuhiTotals" class="totals-shokuhi">
@@ -159,41 +161,44 @@
     </div>
 
     <div class="settle-board">
-        <div id="settleLabel" class="settle-sub">千媛の今月負担 (共有込)</div>
-        <div id="mainVal" class="settle-main-val" style="color:var(--chihiro-color)">¥0</div>
+        <div id="settleLabel" class="settle-sub">読み込み中...</div>
+        <div id="mainVal" class="settle-main-val">¥0</div>
         <div id="subVal" class="settle-sub" style="color:var(--haruka-color); border-top:1px dashed #eee; margin-top:10px; padding-top:10px;">春香の負担: ¥0</div>
     </div>
 
     <div id="history" class="history"></div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwU_7kZnm_stjgRlwdYaaQOWT_CrhV_qyH5LEKiSjD5O08xZsOLPjquF_of0Cjcju8JXA/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwhCOHGDvyMJmPi6N9ljcPPdgeM5uwaEXAS8Yu7DJHUY3FiqBGobcLFaoHe_LR2VN4A/exec";
         let currentOffset = 0;
         let currentSheet = "回答";
 
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
 
+        function setMemo(text) { document.getElementById('memo').value = text; }
+
         function switchSheet(name) {
             currentSheet = name;
-            // タブの見た目
             document.getElementById('tab-shokuhi').className = name === '回答' ? 'tab-item active' : 'tab-item';
             document.getElementById('tab-kounetsu').className = name === '光熱費' ? 'tab-item active' : 'tab-item';
             document.getElementById('tab-seisan').className = name === '精算' ? 'tab-item active' : 'tab-item';
-            
-            // 精算画面の時は入力欄・履歴・月切り替えを隠す
+
             const isSeisan = (name === '精算');
             document.getElementById('inputCard').style.display = isSeisan ? 'none' : 'block';
             document.getElementById('history').style.display = isSeisan ? 'none' : 'block';
             document.getElementById('monthArea').style.display = isSeisan ? 'none' : 'flex';
-            
-            // 合計表示の切り替え
             document.getElementById('shokuhiTotals').style.display = (name === '回答') ? 'flex' : 'none';
+            document.getElementById('quickButtons').style.display = (name === '光熱費') ? 'flex' : 'none';
             
+            document.getElementById('formTitle').innerText = name === '回答' ? '💰 食費入力' : '💡 固定費入力';
+            document.getElementById('memo').placeholder = name === '回答' ? '何に使った？' : '項目を選択または入力';
+
             currentOffset = 0;
             changeMonth(0);
         }
 
         const updateUI = (data) => {
+            if (!data || !data.totals) return;
             const tA = data.totals["千媛"] || 0;
             const tB = data.totals["春香"] || 0;
             const tS = data.totals["共有"] || 0;
@@ -203,36 +208,31 @@
             document.getElementById('tB').innerText = "¥" + tB.toLocaleString();
             document.getElementById('tS').innerText = "¥" + tS.toLocaleString();
 
-            const mainLabel = document.getElementById('settleLabel');
-            const mainVal = document.getElementById('mainVal');
-            const subVal = document.getElementById('subVal');
+            const mL = document.getElementById('settleLabel');
+            const mV = document.getElementById('mainVal');
+            const sV = document.getElementById('subVal');
 
             if (currentSheet === "回答") {
-                mainLabel.innerText = "👸 千媛の今月負担 (共有込)";
-                mainVal.innerText = "¥" + (tA + half).toLocaleString();
-                mainVal.style.color = "var(--chihiro-color)";
-                subVal.innerText = `春香の負担 (共有込): ¥${(tB + half).toLocaleString()}`;
+                mL.innerText = "👸 千媛の今月負担 (共有込)";
+                mV.innerText = "¥" + (tA + half).toLocaleString();
+                mV.style.color = "var(--chihiro-color)";
+                sV.innerText = `春香の負担 (共有込): ¥${(tB + half).toLocaleString()}`;
             } else if (currentSheet === "光熱費") {
-                mainLabel.innerText = "💡 固定費の総額 (千媛立て替え)";
-                mainVal.innerText = "¥" + tS.toLocaleString();
-                mainVal.style.color = "#333";
-                subVal.innerText = `春香が払う分(半分): ¥${half.toLocaleString()}`;
+                mL.innerText = "💡 固定費の総額 (千媛立て替え)";
+                mV.innerText = "¥" + tS.toLocaleString();
+                mV.style.color = "#333";
+                sV.innerText = `春香が払う分(半分): ¥${half.toLocaleString()}`;
             } else {
-                mainLabel.innerText = "🤝 全期間の合計精算";
-                // ここは本来全データが必要ですが、現在の月の差分で表示します
+                mL.innerText = "🤝 今月の精算目安";
                 const diff = (tA + half) - (tB + half);
-                if (diff > 0) {
-                    mainVal.innerText = `春香 ➡ 千媛へ ¥${Math.abs(diff).toLocaleString()}`;
-                } else {
-                    mainVal.innerText = `千媛 ➡ 春香へ ¥${Math.abs(diff).toLocaleString()}`;
-                }
-                mainVal.style.color = "#333";
-                subVal.innerText = "スプレッドシートの全集計結果です";
+                mV.innerText = diff > 0 ? `春香 ➡ 千媛へ ¥${Math.abs(diff).toLocaleString()}` : 
+                               diff < 0 ? `千媛 ➡ 春香へ ¥${Math.abs(diff).toLocaleString()}` : "精算済み！";
+                mV.style.color = "#333";
+                sV.innerText = "※今月分のデータに基づく計算です";
             }
 
-            document.getElementById('viewTitle').innerText = data.targetMonth + "月の集計";
-            const h = document.getElementById('history');
-            h.innerHTML = data.history.map(i => `<div class="history-item">
+            document.getElementById('viewTitle').innerText = (data.targetMonth || "?") + "月の集計";
+            document.getElementById('history').innerHTML = data.history.map(i => `<div class="history-item">
                 <div><span style="font-size:0.65rem; color:#aaa;">${i.user}</span><br><b>${i.memo || 'なし'}</b></div>
                 <div style="text-align:right;"><b>¥${i.amount}</b><br><span style="font-size:0.65rem; color:#ccc;">${i.date}</span></div>
             </div>`).join('');
@@ -241,10 +241,14 @@
         async function changeMonth(diff) {
             currentOffset += diff;
             if (currentOffset < 0) currentOffset = 0;
+            document.getElementById('prevBtn').disabled = (currentOffset === 2);
+            document.getElementById('nextBtn').disabled = (currentOffset === 0);
+            
+            const fetchSheet = (currentSheet === '精算') ? '回答' : currentSheet;
             try {
-                const r = await fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=${currentSheet === '精算' ? '回答' : currentSheet}`);
+                const r = await fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=${fetchSheet}`);
                 updateUI(await r.json());
-            } catch (e) { console.error(e); }
+            } catch (e) { document.getElementById('viewTitle').innerText = "エラー"; }
         }
 
         window.onload = () => switchSheet('回答');
