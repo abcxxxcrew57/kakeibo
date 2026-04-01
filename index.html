@@ -46,9 +46,26 @@
 
         h3 { margin: 0 0 15px 0; text-align: center; color: #333; font-size: 1.1rem; }
 
+        /* 入力欄のレスポンシブ修正 */
         input {
-            width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px;
-            font-size: 16px; box-sizing: border-box; background: #f9f9f9; outline: none; margin-bottom: 10px;
+            width: 100%; 
+            padding: 14px; 
+            border: 1px solid #ddd; 
+            border-radius: 12px;
+            font-size: 16px; 
+            box-sizing: border-box; /* 余白を幅に含める */
+            background: #f9f9f9; 
+            outline: none; 
+            margin-bottom: 10px;
+            display: block;
+            -webkit-appearance: none; /* iPhone Safariのデフォルト装飾をリセット */
+        }
+
+        /* 日付入力の崩れ防止 */
+        input[type="date"] {
+            min-height: 48px; /* タップしやすい高さ */
+            background-color: #f9f9f9;
+            position: relative;
         }
 
         .user-selector { display: flex; gap: 8px; margin-bottom: 15px; }
@@ -56,6 +73,7 @@
         .user-selector label {
             flex: 1; text-align: center; padding: 16px 0; border-radius: 14px;
             background: #eee; color: #666; cursor: pointer; font-weight: bold; transition: 0.2s;
+            border: 2px solid transparent;
         }
         input[id="uA"]:checked+label { background: var(--chihiro-bg); color: var(--chihiro-color); border: 2px solid var(--chihiro-color); }
         input[id="uB"]:checked+label { background: var(--haruka-bg); color: var(--haruka-color); border: 2px solid var(--haruka-color); }
@@ -72,14 +90,16 @@
         button#submitBtn {
             width: 100%; padding: 18px; background: #1c1c1e; color: white; border: none;
             border-radius: 18px; font-size: 18px; font-weight: bold; cursor: pointer;
+            -webkit-appearance: none;
         }
 
         .month-selector {
             display: flex; align-items: center; justify-content: space-between;
             width: 100%; max-width: 400px; margin: 20px 0 10px;
             background: #fff; padding: 8px 15px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-sizing: border-box;
         }
-        .month-btn { background: #f2f2f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
+        .month-btn { background: #f2f2f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;}
         .month-btn:disabled { opacity: 0.2; }
         #viewTitle { font-weight: bold; font-size: 0.9rem; }
 
@@ -119,12 +139,17 @@
     <div class="card">
         <h3 id="formTitle">💰 食費入力</h3>
         <form id="kakeiboForm">
+            <label style="display:block; font-size:0.8rem; color:#999; margin:5px 0 5px 5px; font-weight:bold;">日付</label>
             <input type="date" id="date" required>
+            
+            <label style="display:block; font-size:0.8rem; color:#999; margin:5px 0 5px 5px; font-weight:bold;">だれのもの？</label>
             <div class="user-selector">
                 <input type="radio" name="user" value="千媛" id="uA" checked><label for="uA">千媛</label>
                 <input type="radio" name="user" value="春香" id="uB"><label for="uB">春香</label>
                 <input type="radio" name="user" value="共有" id="uShared"><label for="uShared">共有</label>
             </div>
+
+            <label style="display:block; font-size:0.8rem; color:#999; margin:5px 0 5px 5px; font-weight:bold;">金額</label>
             <input type="number" id="amount" placeholder="¥ 0" inputmode="decimal" required>
             
             <label id="memoLabel" style="display:block; font-size:0.8rem; color:#999; margin:5px 0 5px 5px; font-weight:bold;">メモ</label>
