@@ -235,10 +235,10 @@
                 const kounetsuTB = kounetsuData.totals ? kounetsuData.totals["春香"] || 0 : 0;
                 const kounetsuTS = kounetsuData.totals ? kounetsuData.totals["共有"] || 0 : 0;
                 
-                // 千媛が春香に返す額: 千媛の食費支出 + 食費共有支出
-                const chihiroToHaruka = shokuhiTA + shokuhiTS;
-                // 春香が千媛に返す額: 春香の光熱費支出 + 光熱費共有支出
-                const harukaToChihiro = kounetsuTB + kounetsuTS;
+                // 千媛が春香に返す額: 千媛の食費支出 + 食費共有支出の半分
+                const chihiroToHaruka = shokuhiTA + Math.ceil(shokuhiTS / 2);
+                // 春香が千媛に返す額: 春香の光熱費支出 + 光熱費共有支出の半分
+                const harukaToChihiro = kounetsuTB + Math.ceil(kounetsuTS / 2);
                 
                 const diff = harukaToChihiro - chihiroToHaruka;
                 mL.innerText = "🤝 今月の精算目安";
