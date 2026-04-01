@@ -23,7 +23,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg-color);
             margin: 0;
-            /* iPhoneのセーフエリアを考慮 */
             padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 20px) 16px;
             display: flex;
             flex-direction: column;
@@ -42,16 +41,11 @@
             margin-top: 10px;
         }
 
-        h3 {
-            margin: 0 0 15px 0;
-            text-align: center;
-            color: #333;
-            font-size: 1.1rem;
-        }
+        h3 { margin: 0 0 15px 0; text-align: center; color: #333; font-size: 1.1rem; }
 
-        /* 入力欄：16px以上にすることでズームを防止 */
         input[type="date"],
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"] {
             width: 100%;
             padding: 14px;
             border: 1px solid #ddd;
@@ -77,9 +71,7 @@
             margin-top: 5px;
         }
 
-        .user-selector input {
-            display: none;
-        }
+        .user-selector input { display: none; }
 
         .user-selector label {
             flex: 1;
@@ -95,23 +87,9 @@
             margin: 0;
         }
 
-        input[id="uA"]:checked+label {
-            background: var(--chihiro-bg);
-            border-color: var(--chihiro-color);
-            color: var(--chihiro-color);
-        }
-
-        input[id="uB"]:checked+label {
-            background: var(--haruka-bg);
-            border-color: var(--haruka-color);
-            color: var(--haruka-color);
-        }
-
-        input[id="uShared"]:checked+label {
-            background: var(--shared-bg);
-            border-color: var(--shared-color);
-            color: var(--shared-color);
-        }
+        input[id="uA"]:checked+label { background: var(--chihiro-bg); border-color: var(--chihiro-color); color: var(--chihiro-color); }
+        input[id="uB"]:checked+label { background: var(--haruka-bg); border-color: var(--haruka-color); color: var(--haruka-color); }
+        input[id="uShared"]:checked+label { background: var(--shared-bg); border-color: var(--shared-color); color: var(--shared-color); }
 
         button {
             width: 100%;
@@ -126,10 +104,7 @@
             cursor: pointer;
         }
 
-        button:active {
-            opacity: 0.7;
-            transform: scale(0.98);
-        }
+        button:active { opacity: 0.7; transform: scale(0.98); }
 
         .totals {
             display: flex;
@@ -175,7 +150,6 @@
             align-items: center;
             font-size: 0.85rem;
             backdrop-filter: blur(10px);
-            /* すりガラス効果 */
         }
 
         .tag {
@@ -183,6 +157,8 @@
             padding: 3px 8px;
             border-radius: 6px;
             font-weight: bold;
+            display: inline-block;
+            margin-bottom: 4px;
         }
     </style>
 </head>
@@ -204,6 +180,9 @@
             <label>金額</label>
             <input type="number" id="amount" placeholder="¥ 0" inputmode="decimal" required>
 
+            <label>メモ</label>
+            <input type="text" id="memo" placeholder="何に使った？">
+
             <button type="submit" id="submitBtn">保存する</button>
         </form>
     </div>
@@ -217,10 +196,9 @@
     <div id="history" class="history"></div>
 
     <script>
-        // GASのURLは元のものを引き継いでいます
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwU_7kZnm_stjgRlwdYaaQOWT_CrhV_qyH5LEKiSjD5O08xZsOLPjquF_of0Cjcju8JXA/exec";
 
-        // 今日の日付をセット
+        // 日付セット
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = ("0" + (today.getMonth() + 1)).slice(-2);
@@ -231,18 +209,23 @@
             document.getElementById('tA').innerText = "¥" + data.totals["千媛"].toLocaleString();
             document.getElementById('tB').innerText = "¥" + data.totals["春香"].toLocaleString();
             document.getElementById('tS').innerText = "¥" + data.totals["共有"].toLocaleString();
+            
             const h = document.getElementById('history');
             h.innerHTML = data.history.map(i => {
                 const c = i.user === "千媛" ? "var(--chihiro-color)" : i.user === "春香" ? "var(--haruka-color)" : "var(--shared-color)";
                 return `<div class="history-item">
-                    <span class="tag" style="background:${c}15; color:${c}">${i.user}</span>
-                    <span style="font-weight:bold; flex-grow:1; text-align:right; margin-right:15px;">¥${i.amount}</span>
-                    <span style="color:#bbb; font-size:0.75rem;">${i.date}</span>
+                    <div style="display:flex; flex-direction:column;">
+                        <span class="tag" style="background:${c}15; color:${c}; width:fit-content;">${i.user}</span>
+                        <span style="font-weight:bold; color:#333;">${i.memo || '---'}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:bold; font-size:1rem;">¥${i.amount}</div>
+                        <div style="color:#bbb; font-size:0.7rem;">${i.date}</div>
+                    </div>
                 </div>`;
             }).join('');
         };
 
-        // 初回読み込み
         window.onload = async () => {
             try {
                 const r = await fetch(GAS_URL);
@@ -250,7 +233,6 @@
             } catch (e) { console.error("Load Error", e); }
         };
 
-        // 送信処理
         document.getElementById('kakeiboForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -260,7 +242,8 @@
             const body = {
                 date: document.getElementById('date').value,
                 user: document.querySelector('input[name="user"]:checked').value,
-                amount: document.getElementById('amount').value
+                amount: document.getElementById('amount').value,
+                memo: document.getElementById('memo').value // メモを追加
             };
 
             try {
@@ -268,11 +251,11 @@
                 const result = await r.json();
                 updateUI(result);
                 document.getElementById('amount').value = "";
-                // 成功時に少しだけボタンの色を変えるフィードバック
+                document.getElementById('memo').value = ""; // メモをリセット
                 btn.style.background = "#4cd964";
                 setTimeout(() => { btn.style.background = "#1c1c1e"; }, 1000);
             } catch (e) {
-                alert("エラーが発生しました。ネット接続を確認してください。");
+                alert("エラーが発生しました。");
             } finally {
                 btn.disabled = false;
                 btn.innerText = "保存する";
