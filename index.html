@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>爆速家計簿</title>
     <style>
         :root {
@@ -20,141 +17,147 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-color);
             margin: 0;
-            padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 20px) 16px;
+            padding: env(safe-area-inset-top) 16px 40px 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            -webkit-tap-highlight-color: transparent;
         }
 
+        /* タブ切り替え */
+        .tab-container {
+            display: flex; width: 100%; max-width: 400px;
+            background: #e5e5ea; border-radius: 14px; padding: 4px;
+            margin: 10px 0; box-sizing: border-box;
+        }
+        .tab-item {
+            flex: 1; text-align: center; padding: 10px; border-radius: 11px;
+            font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+        }
+        .tab-item.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
         .card {
-            background: white;
-            width: 100%;
-            max-width: 400px;
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            background: white; width: 100%; max-width: 400px;
+            border-radius: 24px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             box-sizing: border-box;
-            margin-top: 10px;
         }
 
         h3 { margin: 0 0 15px 0; text-align: center; color: #333; font-size: 1.1rem; }
 
-        input[type="date"], input[type="number"], input[type="text"] {
+        input {
             width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px;
-            font-size: 16px; box-sizing: border-box; background: #f9f9f9; outline: none; appearance: none;
+            font-size: 16px; box-sizing: border-box; background: #f9f9f9; outline: none; margin-bottom: 10px;
         }
 
-        label { display: block; font-size: 0.8rem; color: #999; margin: 15px 0 5px 5px; font-weight: bold; }
-
-        .user-selector { display: flex; gap: 8px; margin-top: 5px; }
+        .user-selector { display: flex; gap: 8px; margin-bottom: 15px; }
         .user-selector input { display: none; }
         .user-selector label {
             flex: 1; text-align: center; padding: 16px 0; border-radius: 14px;
-            background: #eee; color: #666; cursor: pointer; font-weight: bold;
-            border: 2px solid transparent; transition: 0.2s; margin: 0;
+            background: #eee; color: #666; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
+        input[id="uA"]:checked+label { background: var(--chihiro-bg); color: var(--chihiro-color); border: 2px solid var(--chihiro-color); }
+        input[id="uB"]:checked+label { background: var(--haruka-bg); color: var(--haruka-color); border: 2px solid var(--haruka-color); }
+        input[id="uShared"]:checked+label { background: var(--shared-bg); color: var(--shared-color); border: 2px solid var(--shared-color); }
 
-        input[id="uA"]:checked+label { background: var(--chihiro-bg); border-color: var(--chihiro-color); color: var(--chihiro-color); }
-        input[id="uB"]:checked+label { background: var(--haruka-bg); border-color: var(--haruka-color); color: var(--haruka-color); }
-        input[id="uShared"]:checked+label { background: var(--shared-bg); border-color: var(--shared-color); color: var(--shared-color); }
+        /* クイックボタン用 */
+        .q-btn-container { display: none; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .q-btn {
+            background: #fff; border: 1px solid #ddd; padding: 8px 12px;
+            border-radius: 20px; font-size: 0.8rem; cursor: pointer; color: #555;
+        }
+        .q-btn:active { background: #eee; }
 
         button#submitBtn {
             width: 100%; padding: 18px; background: #1c1c1e; color: white; border: none;
-            border-radius: 18px; font-size: 18px; font-weight: bold; margin-top: 25px; cursor: pointer;
+            border-radius: 18px; font-size: 18px; font-weight: bold; cursor: pointer;
         }
-        button#submitBtn:active { opacity: 0.7; transform: scale(0.98); }
 
-        /* 月切り替えパネル */
         .month-selector {
             display: flex; align-items: center; justify-content: space-between;
-            width: 100%; max-width: 400px; margin-top: 20px;
-            background: #fff; padding: 10px 15px; border-radius: 50px;
-            box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            width: 100%; max-width: 400px; margin: 20px 0 10px;
+            background: #fff; padding: 8px 15px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .month-btn {
-            background: #f2f2f7; border: none; width: 40px; height: 40px;
-            border-radius: 50%; font-size: 1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .month-btn { background: #f2f2f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
         .month-btn:disabled { opacity: 0.2; }
-        #viewTitle { font-weight: 800; font-size: 0.9rem; color: #333; }
+        #viewTitle { font-weight: bold; font-size: 0.9rem; }
 
-        .totals {
-            display: flex; justify-content: space-between; margin-top: 15px;
+        .totals-shokuhi {
+            display: flex; justify-content: space-between; margin-top: 10px;
             width: 100%; max-width: 400px; gap: 8px;
         }
         .total-item {
             flex: 1; background: white; padding: 12px 4px; border-radius: 16px;
-            text-align: center; font-size: 0.7rem; color: #888; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            text-align: center; font-size: 0.7rem; color: #888; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
         .total-val { display: block; font-size: 0.9rem; font-weight: bold; color: #333; margin-top: 3px; }
 
         .settle-board {
             width: 100%; max-width: 400px; margin-top: 15px;
             background: linear-gradient(135deg, #ffffff 0%, #f9f9fb 100%);
-            padding: 20px; border-radius: 24px; display: flex; justify-content: space-between;
-            box-sizing: border-box; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(0,0,0,0.03);
+            padding: 20px; border-radius: 24px; text-align: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06); box-sizing: border-box;
         }
-        .settle-item { text-align: center; flex: 1; }
-        .settle-label { font-size: 0.7rem; color: #666; font-weight: bold; }
-        .settle-val { display: block; font-size: 1.2rem; font-weight: 800; margin-top: 6px; }
+        .settle-main-val { font-size: 1.6rem; font-weight: 900; margin: 5px 0; }
+        .settle-sub { font-size: 0.75rem; color: #666; font-weight: bold; }
 
         .history { width: 100%; max-width: 400px; margin-top: 20px; }
         .history-item {
             background: rgba(255, 255, 255, 0.7); padding: 12px 15px; border-radius: 16px;
-            margin-bottom: 8px; display: flex; justify-content: space-between;
-            align-items: center; font-size: 0.85rem; backdrop-filter: blur(10px);
+            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
         }
-        .tag { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin-bottom: 4px; }
     </style>
 </head>
-
 <body>
 
+    <div class="tab-container">
+        <div id="tab-shokuhi" class="tab-item active" onclick="switchSheet('回答')">🛒 食費</div>
+        <div id="tab-kounetsu" class="tab-item" onclick="switchSheet('光熱費')">💡 固定費</div>
+    </div>
+
     <div class="card">
-        <h3>💰 食費入力</h3>
+        <h3 id="formTitle">💰 食費入力</h3>
         <form id="kakeiboForm">
             <input type="date" id="date" required>
-            <label>だれのもの？</label>
             <div class="user-selector">
-                <input type="radio" name="user" value="千媛" id="uA" required><label for="uA">千媛</label>
+                <input type="radio" name="user" value="千媛" id="uA" checked><label for="uA">千媛</label>
                 <input type="radio" name="user" value="春香" id="uB"><label for="uB">春香</label>
                 <input type="radio" name="user" value="共有" id="uShared"><label for="uShared">共有</label>
             </div>
-            <label>金額</label>
             <input type="number" id="amount" placeholder="¥ 0" inputmode="decimal" required>
-            <label>メモ</label>
+            
+            <label id="memoLabel" style="display:block; font-size:0.8rem; color:#999; margin:5px 0 5px 5px; font-weight:bold;">メモ</label>
             <input type="text" id="memo" placeholder="何に使った？">
+
+            <div id="quickButtons" class="q-btn-container">
+                <button type="button" class="q-btn" onclick="setMemo('⚡ 電気代')">⚡ 電気</button>
+                <button type="button" class="q-btn" onclick="setMemo('🔥 ガス代')">🔥 ガス</button>
+                <button type="button" class="q-btn" onclick="setMemo('💧 水道代')">💧 水道</button>
+                <button type="button" class="q-btn" onclick="setMemo('🥛 サーバー')">🥛 サーバー</button>
+                <button type="button" class="q-btn" onclick="setMemo('🚗 駐車代')">🚗 駐車</button>
+            </div>
+
             <button type="submit" id="submitBtn">保存する</button>
         </form>
     </div>
 
     <div class="month-selector">
-        <button type="button" class="month-btn" id="prevBtn" onclick="changeMonth(-1)">◀</button>
+        <button class="month-btn" id="prevBtn" onclick="changeMonth(-1)">◀</button>
         <div id="viewTitle">読み込み中...</div>
-        <button type="button" class="month-btn" id="nextBtn" onclick="changeMonth(1)">▶</button>
+        <button class="month-btn" id="nextBtn" onclick="changeMonth(1)">▶</button>
     </div>
 
-    <div class="totals">
+    <div id="shokuhiTotals" class="totals-shokuhi">
         <div class="total-item">千媛<span id="tA" class="total-val" style="color:var(--chihiro-color)">¥0</span></div>
         <div class="total-item">春香<span id="tB" class="total-val" style="color:var(--haruka-color)">¥0</span></div>
         <div class="total-item">共有<span id="tS" class="total-val" style="color:var(--shared-color)">¥0</span></div>
     </div>
 
     <div class="settle-board">
-        <div class="settle-item">
-            <span class="settle-label">👸 千媛の総負担額</span>
-            <span id="sA" class="settle-val" style="color: var(--chihiro-color);">¥0</span>
-        </div>
-        <div class="settle-item" style="border-left: 2px dashed #eee; margin-left: 10px; padding-left: 10px;">
-            <span class="settle-label">👸 春香の総負担額</span>
-            <span id="sB" class="settle-val" style="color: var(--haruka-color);">¥0</span>
-        </div>
+        <div id="settleLabel" class="settle-sub">千媛の今月負担 (共有込)</div>
+        <div id="mainVal" class="settle-main-val" style="color:var(--chihiro-color)">¥0</div>
+        <div id="subVal" class="settle-sub" style="color:var(--haruka-color); border-top:1px dashed #eee; margin-top:10px; padding-top:10px;">春香の負担: ¥0</div>
     </div>
 
     <div id="history" class="history"></div>
@@ -162,55 +165,64 @@
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwU_7kZnm_stjgRlwdYaaQOWT_CrhV_qyH5LEKiSjD5O08xZsOLPjquF_of0Cjcju8JXA/exec";
         let currentOffset = 0;
+        let currentSheet = "回答";
 
-        const setToday = () => {
-            const today = new Date();
-            document.getElementById('date').value = today.toISOString().split('T')[0];
-        };
-        setToday();
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+        function setMemo(text) {
+            document.getElementById('memo').value = text;
+        }
+
+        function switchSheet(name) {
+            currentSheet = name;
+            document.getElementById('tab-shokuhi').className = name === '回答' ? 'tab-item active' : 'tab-item';
+            document.getElementById('tab-kounetsu').className = name === '光熱費' ? 'tab-item active' : 'tab-item';
+            document.getElementById('formTitle').innerText = name === '回答' ? '💰 食費入力' : '💡 固定費入力';
+            
+            document.getElementById('shokuhiTotals').style.display = name === '回答' ? 'flex' : 'none';
+            document.getElementById('quickButtons').style.display = name === '光熱費' ? 'flex' : 'none';
+            document.getElementById('memo').value = "";
+            
+            currentOffset = 0;
+            changeMonth(0);
+        }
 
         const updateUI = (data) => {
-            const tA = data.totals["千媛"];
-            const tB = data.totals["春香"];
-            const tS = data.totals["共有"];
+            const tA = data.totals["千媛"] || 0;
+            const tB = data.totals["春香"] || 0;
+            const tS = data.totals["共有"] || 0;
+            const half = Math.ceil(tS / 2);
 
             document.getElementById('tA').innerText = "¥" + tA.toLocaleString();
             document.getElementById('tB').innerText = "¥" + tB.toLocaleString();
             document.getElementById('tS').innerText = "¥" + tS.toLocaleString();
 
-            const halfShared = Math.ceil(tS / 2);
-            document.getElementById('sA').innerText = "¥" + (tA + halfShared).toLocaleString();
-            document.getElementById('sB').innerText = "¥" + (tB + halfShared).toLocaleString();
+            if (currentSheet === "回答") {
+                document.getElementById('settleLabel').innerText = "👸 千媛の今月負担 (共有込)";
+                document.getElementById('mainVal').innerText = "¥" + (tA + half).toLocaleString();
+                document.getElementById('mainVal').style.color = "var(--chihiro-color)";
+                document.getElementById('subVal').innerText = `春香の負担 (共有込): ¥${(tB + half).toLocaleString()}`;
+            } else {
+                document.getElementById('settleLabel').innerText = "💡 固定費の総額 (千媛立て替え)";
+                document.getElementById('mainVal').innerText = "¥" + tS.toLocaleString();
+                document.getElementById('mainVal').style.color = "#333";
+                document.getElementById('subVal').innerText = `春香が払う分(半分): ¥${half.toLocaleString()}`;
+            }
 
             document.getElementById('viewTitle').innerText = data.targetMonth + "月の集計";
-            
             const h = document.getElementById('history');
-            h.innerHTML = data.history.map(i => {
-                const c = i.user === "千媛" ? "var(--chihiro-color)" : i.user === "春香" ? "var(--haruka-color)" : "var(--shared-color)";
-                return `<div class="history-item">
-                    <div style="display:flex; flex-direction:column;">
-                        <span class="tag" style="background:${c}15; color:${c}; width:fit-content;">${i.user}</span>
-                        <span style="font-weight:bold; color:#333;">${i.memo || '---'}</span>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-weight:bold; font-size:1rem;">¥${i.amount}</div>
-                        <div style="color:#bbb; font-size:0.75rem;">${i.date}</div>
-                    </div>
-                </div>`;
-            }).join('');
+            h.innerHTML = data.history.map(i => `<div class="history-item">
+                <div><span style="font-size:0.65rem; color:#aaa;">${i.user}</span><br><b>${i.memo || 'なし'}</b></div>
+                <div style="text-align:right;"><b>¥${i.amount}</b><br><span style="font-size:0.65rem; color:#ccc;">${i.date}</span></div>
+            </div>`).join('');
         };
 
         async function changeMonth(diff) {
             currentOffset += diff;
             if (currentOffset < 0) currentOffset = 0;
-            if (currentOffset > 2) currentOffset = 2;
-
-            // 左(◀)は今月(0)なら無効、右(▶)は最過去(2)なら無効
             document.getElementById('prevBtn').disabled = (currentOffset === 0);
-            document.getElementById('nextBtn').disabled = (currentOffset === 2);
-            
             try {
-                const r = await fetch(`${GAS_URL}?offset=${currentOffset}`);
+                const r = await fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=${currentSheet}`);
                 updateUI(await r.json());
             } catch (e) { console.error(e); }
         }
@@ -221,14 +233,13 @@
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             btn.disabled = true; btn.innerText = "送信中...";
-
             const body = {
+                sheetName: currentSheet,
                 date: document.getElementById('date').value,
                 user: document.querySelector('input[name="user"]:checked').value,
                 amount: document.getElementById('amount').value,
                 memo: document.getElementById('memo').value
             };
-
             try {
                 const r = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(body) });
                 currentOffset = 0;
@@ -237,10 +248,9 @@
                 document.getElementById('memo').value = "";
                 btn.style.background = "#4cd964";
                 setTimeout(() => { btn.style.background = "#1c1c1e"; }, 1000);
-            } catch (e) { alert("エラーが発生しました。"); }
+            } catch (e) { alert("エラー！"); }
             finally { btn.disabled = false; btn.innerText = "保存する"; }
         };
     </script>
 </body>
-
 </html>
