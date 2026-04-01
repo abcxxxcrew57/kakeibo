@@ -223,12 +223,29 @@
                 mV.style.color = "#333";
                 sV.innerText = `春香が払う分(半分): ¥${half.toLocaleString()}`;
             } else {
+                // 精算タブ: 立て替え関係に基づく計算
+                const shokuhiData = data.shokuhi || data; // 食費データ
+                const kounetsuData = data.kounetsu || {}; // 光熱費データ
+                
+                const shokuhiTA = shokuhiData.totals ? shokuhiData.totals["千媛"] || 0 : 0;
+                const shokuhiTB = shokuhiData.totals ? shokuhiData.totals["春香"] || 0 : 0;
+                const shokuhiTS = shokuhiData.totals ? shokuhiData.totals["共有"] || 0 : 0;
+                
+                const kounetsuTA = kounetsuData.totals ? kounetsuData.totals["千媛"] || 0 : 0;
+                const kounetsuTB = kounetsuData.totals ? kounetsuData.totals["春香"] || 0 : 0;
+                const kounetsuTS = kounetsuData.totals ? kounetsuData.totals["共有"] || 0 : 0;
+                
+                // 千媛が春香に返す額: 千媛の食費支出 + 食費共有支出
+                const chihiroToHaruka = shokuhiTA + shokuhiTS;
+                // 春香が千媛に返す額: 春香の光熱費支出 + 光熱費共有支出
+                const harukaToChihiro = kounetsuTB + kounetsuTS;
+                
+                const diff = harukaToChihiro - chihiroToHaruka;
                 mL.innerText = "🤝 今月の精算目安";
-                const diff = (tA + half) - (tB + half);
                 mV.innerText = diff > 0 ? `春香 ➡ 千媛へ ¥${Math.abs(diff).toLocaleString()}` : 
                                diff < 0 ? `千媛 ➡ 春香へ ¥${Math.abs(diff).toLocaleString()}` : "精算済み！";
                 mV.style.color = "#333";
-                sV.innerText = "※今月分のデータに基づく計算です";
+                sV.innerText = `春香→千媛: ¥${harukaToChihiro.toLocaleString()} | 千媛→春香: ¥${chihiroToHaruka.toLocaleString()}`;
             }
 
             document.getElementById('viewTitle').innerText = (data.targetMonth || "?") + "月の集計";
@@ -244,11 +261,30 @@
             document.getElementById('prevBtn').disabled = (currentOffset === 2);
             document.getElementById('nextBtn').disabled = (currentOffset === 0);
             
-            const fetchSheet = (currentSheet === '精算') ? '回答' : currentSheet;
-            try {
-                const r = await fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=${fetchSheet}`);
-                updateUI(await r.json());
-            } catch (e) { document.getElementById('viewTitle').innerText = "エラー"; }
+            if (currentSheet === '精算') {
+                // 精算タブでは食費と光熱費の両方のデータを取得
+                try {
+                    const [shokuhiRes, kounetsuRes] = await Promise.all([
+                        fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=回答`),
+                        fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=光熱費`)
+                    ]);
+                    const shokuhiData = await shokuhiRes.json();
+                    const kounetsuData = await kounetsuRes.json();
+                    // データを統合
+                    const combinedData = {
+                        ...shokuhiData,
+                        shokuhi: shokuhiData,
+                        kounetsu: kounetsuData
+                    };
+                    updateUI(combinedData);
+                } catch (e) { document.getElementById('viewTitle').innerText = "エラー"; }
+            } else {
+                const fetchSheet = currentSheet;
+                try {
+                    const r = await fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=${fetchSheet}`);
+                    updateUI(await r.json());
+                } catch (e) { document.getElementById('viewTitle').innerText = "エラー"; }
+            }
         }
 
         window.onload = () => switchSheet('回答');
