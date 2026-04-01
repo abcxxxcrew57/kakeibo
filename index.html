@@ -169,7 +169,7 @@
     <div id="history" class="history"></div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwhCOHGDvyMJmPi6N9ljcPPdgeM5uwaEXAS8Yu7DJHUY3FiqBGobcLFaoHe_LR2VN4A/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwWeLqZoIxAVEoNMk2Ml7YqZV02c77psks_U2qoQzhYhtxXa0s-EdlvvUhg_Pl9XfxB/exec";
         let currentOffset = 0;
         let currentSheet = "回答";
 
@@ -262,11 +262,11 @@
             document.getElementById('nextBtn').disabled = (currentOffset === 0);
             
             if (currentSheet === '精算') {
-                // 精算タブでは食費と光熱費の両方のデータを取得
+                // 精算タブでは全期間の食費と光熱費のデータを取得
                 try {
                     const [shokuhiRes, kounetsuRes] = await Promise.all([
-                        fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=回答`),
-                        fetch(`${GAS_URL}?offset=${currentOffset}&sheetName=光熱費`)
+                        fetch(`${GAS_URL}?sheetName=回答&all=true`), // 全期間
+                        fetch(`${GAS_URL}?sheetName=光熱費&all=true`) // 全期間
                     ]);
                     const shokuhiData = await shokuhiRes.json();
                     const kounetsuData = await kounetsuRes.json();
@@ -274,7 +274,8 @@
                     const combinedData = {
                         ...shokuhiData,
                         shokuhi: shokuhiData,
-                        kounetsu: kounetsuData
+                        kounetsu: kounetsuData,
+                        targetMonth: "全期間"
                     };
                     updateUI(combinedData);
                 } catch (e) { document.getElementById('viewTitle').innerText = "エラー"; }
