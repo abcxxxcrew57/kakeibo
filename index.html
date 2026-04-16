@@ -137,11 +137,12 @@
             
             <input type="text" id="memo" placeholder="何に使った？">
             <div id="quickButtons" class="q-btn-container">
-                <button type="button" class="q-btn" onclick="setMemo('⚡ 電気代')">⚡ 電気</button>
-                <button type="button" class="q-btn" onclick="setMemo('🔥 ガス代')">🔥 ガス</button>
-                <button type="button" class="q-btn" onclick="setMemo('💧 水道代')">💧 水道</button>
-                <button type="button" class="q-btn" onclick="setMemo('🥛 サーバー')">🥛 サーバー</button>
-                <button type="button" class="q-btn" onclick="setMemo('🚗 駐車代')">🚗 駐車</button>
+                <button type="button" class="q-btn food-only" onclick="setMemo('🛒 コープデリ')">🛒 コープデリ</button>
+                <button type="button" class="q-btn utility-only" onclick="setMemo('⚡ 電気代')">⚡ 電気</button>
+                <button type="button" class="q-btn utility-only" onclick="setMemo('🔥 ガス代')">🔥 ガス</button>
+                <button type="button" class="q-btn utility-only" onclick="setMemo('💧 水道代')">💧 水道</button>
+                <button type="button" class="q-btn utility-only" onclick="setMemo('🥛 サーバー')">🥛 サーバー</button>
+                <button type="button" class="q-btn utility-only" onclick="setMemo('🚗 駐車代')">🚗 駐車</button>
             </div>
             
             <button type="submit" id="submitBtn">保存する</button>
@@ -149,9 +150,9 @@
     </div>
 
     <div id="monthArea" class="month-selector">
-        <button class="month-btn" id="prevBtn" onclick="changeMonth(1)">▶</button>
+        <button class="month-btn" id="prevBtn" onclick="changeMonth(-1)">◀</button>
         <div id="viewTitle">読み込み中...</div>
-        <button class="month-btn" id="nextBtn" onclick="changeMonth(-1)">◀</button>
+        <button class="month-btn" id="nextBtn" onclick="changeMonth(1)">▶</button>
     </div>
 
     <div id="shokuhiTotals" class="totals-shokuhi">
@@ -188,7 +189,14 @@
             document.getElementById('history').style.display = isSeisan ? 'none' : 'block';
             document.getElementById('monthArea').style.display = isSeisan ? 'none' : 'flex';
             document.getElementById('shokuhiTotals').style.display = (name === '回答') ? 'flex' : 'none';
-            document.getElementById('quickButtons').style.display = (name === '光熱費') ? 'flex' : 'none';
+            document.getElementById('quickButtons').style.display = (name === '回答' || name === '光熱費') ? 'flex' : 'none';
+
+            document.querySelectorAll('#quickButtons .utility-only').forEach(btn => {
+                btn.style.display = name === '光熱費' ? 'inline-flex' : 'none';
+            });
+            document.querySelectorAll('#quickButtons .food-only').forEach(btn => {
+                btn.style.display = name === '回答' ? 'inline-flex' : 'none';
+            });
             
             document.getElementById('formTitle').innerText = name === '回答' ? '💰 食費入力' : '💡 固定費入力';
             document.getElementById('memo').placeholder = name === '回答' ? '何に使った？' : '項目を選択または入力';
@@ -241,7 +249,7 @@
                 const harukaToChihiro = kounetsuTB + Math.ceil(kounetsuTS / 2);
                 
                 const diff = harukaToChihiro - chihiroToHaruka;
-                mL.innerText = "🤝 今月の精算目安";
+                mL.innerText = "🤝 清算";
                 mV.innerText = diff > 0 ? `春香 ➡ 千媛へ ¥${Math.abs(diff).toLocaleString()}` : 
                                diff < 0 ? `千媛 ➡ 春香へ ¥${Math.abs(diff).toLocaleString()}` : "精算済み！";
                 mV.style.color = "#333";
@@ -258,8 +266,8 @@
         async function changeMonth(diff) {
             currentOffset += diff;
             if (currentOffset < 0) currentOffset = 0;
-            document.getElementById('prevBtn').disabled = (currentOffset === 2);
-            document.getElementById('nextBtn').disabled = (currentOffset === 0);
+            document.getElementById('prevBtn').disabled = (currentOffset === 0);
+            document.getElementById('nextBtn').disabled = (currentOffset === 2);
             
             if (currentSheet === '精算') {
                 // 精算タブでは全期間の食費と光熱費のデータを取得
